@@ -10,6 +10,7 @@ object Runner {
     val forest = new IsolationForest()
     val model = forest.fit(df)
     model.save("boooop")
+//    IsolationForest.load()
     println("woosh")
   }
 }
