@@ -2,6 +2,7 @@ package edu.vsu.hw.ml
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
 //import akka.http.scaladsl.server.PathMatchers.Segment
 //import akka.http.scaladsl.server.directives.PathDirectives.Segment
 import akka.http.scaladsl.server.directives.DebuggingDirectives._
@@ -24,8 +25,11 @@ trait Service extends Protocols {
   val routes = {
     logRequestResult("model-service") {
       pathPrefix("predict")
-        (get & pathSegment(Segment)) {
+        (post & pathSegment(Segment)) {
           features: String =>
+            complete {
+              ToResponseMarshallable(model.predict(features))
+            }
         }
     }
   }
