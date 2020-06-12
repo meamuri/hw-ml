@@ -19,8 +19,10 @@ class ModelService extends App with Service {
     .appName("Spark Isolation Forest")
     .config("spark.master", "local")
     .getOrCreate()
-  override implicit def sprayJsonMarshaller[T](implicit writer: RootJsonWriter[T], printer: JsonPrinter): ToEntityMarshaller[T] = ???
-  override val predictionConventions: PredictionConventions = ???
+  override implicit def sprayJsonMarshaller[T](implicit writer: RootJsonWriter[T], printer: JsonPrinter): ToEntityMarshaller[T] =
+    Dependencies.getSprayJsonMarshaller
+  override val predictionConventions: PredictionConventions =
+    Dependencies.getPredictionConventionsImplementation
 
   override val pathToModel: String = "model.data"
 
