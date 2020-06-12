@@ -24,11 +24,6 @@ object Runner {
     session.stop()
   }
 
-  def dataToDataset(sparkSession: SparkSession, data: List[HealthReport]): Dataset[HealthReport] = {
-    sparkSession
-      .createDataset(data)
-  }
-
   def instanceIF(): IsolationForest = {
     new IsolationForest()
       .setNumEstimators(100)

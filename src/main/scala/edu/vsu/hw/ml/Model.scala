@@ -1,13 +1,14 @@
 package edu.vsu.hw.ml
 
-import com.linkedin.relevance.isolationforest.{IsolationForest, IsolationForestModel}
+import com.linkedin.relevance.isolationforest.IsolationForestModel
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 trait Model {
 
   val pathToModel: String
   val sparkSession: SparkSession
+  val predictionConventions: PredictionConventions
 
   val schema: StructType = StructType(
     StructField("user_id", StringType, nullable = false) ::
@@ -22,27 +23,31 @@ trait Model {
 
   def withModel(f: IsolationForestModel => Unit)
 
-  protected final def toInnerInterpretation(entities: List[HealthReport]): Dataset[HealthReport] = {
-    Runner.dataToDataset(sparkSession, entities)
-  }
 }
 
 object Model {
-  def apply(sparkSession: SparkSession, pathToModel: String): Model = {
-    new ModelImplementation(sparkSession, pathToModel)
+  def apply(predictionConventions: PredictionConventions, sparkSession: SparkSession, pathToModel: String): Model = {
+    new ModelImplementation(predictionConventions, sparkSession, pathToModel)
   }
 
-  private class ModelImplementation(override val sparkSession: SparkSession,
+  private class ModelImplementation(override val predictionConventions: PredictionConventions,
+                                    override val sparkSession: SparkSession,
                                     override val pathToModel: String) extends Model {
     override def predict(features: String): HWPrediction = {
-      val representation = toInnerInterpretation(List())
-      val res = isolationForestModel.transform(representation)
-      val col = res.select(outlierColumnName)
-      HWPrediction(25.0)
+      val report = predictionConventions.decode(features)
+      val reports = List(report).map {
+        predictionConventions.healthReportToHealthEntity
+      }
+      val forPrediction = predictionConventions.toInnerInterpretation(reports)
+      val res = isolationForestModel.transform(forPrediction)
+      val colValue = predictionConventions.toScore(res.select(outlierColumnName))
+      HWPrediction(colValue)
     }
 
     override def fitModel(data: List[HealthReport]): Unit = {
-      Runner.instanceIF().fit(toInnerInterpretation(data)).save(pathToModel)
+      val entities = data.map(predictionConventions.healthReportToHealthEntity)
+      val dataset = predictionConventions.toInnerInterpretation(entities)
+      Runner.instanceIF().fit(dataset).save(pathToModel)
     }
 
     override def withModel(f: IsolationForestModel => Unit): Unit = {

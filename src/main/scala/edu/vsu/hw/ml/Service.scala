@@ -23,6 +23,7 @@ trait Service extends Protocols {
 
   val logger: LoggingAdapter
   val sparkSession: SparkSession
+  val predictionConventions: PredictionConventions
 
   implicit def sprayJsonMarshaller[T](
     implicit writer: RootJsonWriter[T],
@@ -30,7 +31,7 @@ trait Service extends Protocols {
   ToEntityMarshaller[T]
 
   val pathToModel: String
-  val model: Model = Model.apply(sparkSession, pathToModel)
+  val model: Model = Model.apply(predictionConventions, sparkSession, pathToModel)
 
   val routes: Route = {
     logRequestResult("model-service") {
