@@ -1,9 +1,11 @@
 package edu.vsu.hw.ml
 
 import com.linkedin.relevance.isolationforest.IsolationForest
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 object Runner {
+  val contamination = 0.1
+
   def main(args: Array[String]): Unit = {
     val session = SparkSession
       .builder()
@@ -14,23 +16,30 @@ object Runner {
     val df = session.read.json("features.json")
     df.show()
 
-    val contamination = 0.1
+    val isolationForest = instanceIF()
 
-    val isolationForest = new IsolationForest()
+    val isolationForestModel = isolationForest.fit(df)
+    isolationForestModel.write.overwrite.save("model.data")
+
+    session.stop()
+  }
+
+  def dataToDataset(sparkSession: SparkSession, data: List[HealthReport]): Dataset[HealthReport] = {
+    sparkSession
+      .createDataset(data)
+  }
+
+  def instanceIF(): IsolationForest = {
+    new IsolationForest()
       .setNumEstimators(100)
       .setBootstrap(false)
       .setMaxSamples(256)
       .setMaxFeatures(1.0)
       .setFeaturesCol("features")
       .setPredictionCol("predictedLabel")
-      .setScoreCol("outlierScore")
+      .setScoreCol(outlierColumnName)
       .setContamination(contamination)
       .setContaminationError(0.01 * contamination)
       .setRandomSeed(1)
-
-    val isolationForestModel = isolationForest.fit(df)
-    isolationForestModel.write.overwrite.save("model.data")
-
-    session.stop()
   }
 }

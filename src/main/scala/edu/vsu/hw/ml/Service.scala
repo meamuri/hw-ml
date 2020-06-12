@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.directives.PathDirectives._
 import akka.http.scaladsl.server.directives.MethodDirectives._
 import akka.http.scaladsl.server.directives.RouteDirectives._
 import akka.stream.Materializer
+import org.apache.spark.sql.SparkSession
 import spray.json.{CompactPrinter, JsonPrinter, RootJsonWriter}
 
 import scala.concurrent.ExecutionContextExecutor
@@ -21,6 +22,7 @@ trait Service extends Protocols {
   implicit val materializer: Materializer
 
   val logger: LoggingAdapter
+  val sparkSession: SparkSession
 
   implicit def sprayJsonMarshaller[T](
     implicit writer: RootJsonWriter[T],
@@ -28,7 +30,7 @@ trait Service extends Protocols {
   ToEntityMarshaller[T]
 
   val pathToModel: String
-  val model: Model = Model.apply(pathToModel)
+  val model: Model = Model.apply(sparkSession, pathToModel)
 
   val routes: Route = {
     logRequestResult("model-service") {
