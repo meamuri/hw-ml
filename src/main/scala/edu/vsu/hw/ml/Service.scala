@@ -22,6 +22,9 @@ trait Service extends Protocols {
 
   val logger: LoggingAdapter
 
+  val pathToModel: String
+  val model: Model = Model.apply(pathToModel)
+
   val routes = {
     logRequestResult("model-service") {
       pathPrefix("predict")
