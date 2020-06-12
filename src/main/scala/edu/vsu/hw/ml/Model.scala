@@ -1,11 +1,7 @@
 package edu.vsu.hw.ml
 
-import java.time.OffsetDateTime
-
 import com.linkedin.relevance.isolationforest.{IsolationForest, IsolationForestModel}
 import org.apache.spark.sql.Dataset
-
-import scala.util.Random
 
 trait Model {
 
