@@ -29,7 +29,7 @@ object Runner {
       .setRandomSeed(1)
 
     val isolationForestModel = isolationForest.fit(df)
-    isolationForestModel.save("model.data")
+    isolationForestModel.write.overwrite.save("model.data")
 
     session.stop()
   }
