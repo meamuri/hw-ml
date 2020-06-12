@@ -13,6 +13,7 @@ libraryDependencies += "com.linkedin.isolation-forest" % "isolation-forest_2.4.3
 libraryDependencies += "com.typesafe.akka" %% "akka-http"   % "10.1.12"
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.23" // or whatever the latest version is
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.31"
+libraryDependencies += "io.spray" %%  "spray-json" % "1.3.5"
 
 dockerfile in docker := {
   val jarFile = sbt.Keys.`package`

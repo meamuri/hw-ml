@@ -2,18 +2,18 @@ package edu.vsu.hw.ml
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshalling.{ToEntityMarshaller, ToResponseMarshallable}
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.PathDirectives.Segment
 import akka.http.scaladsl.server.directives.DebuggingDirectives._
 import akka.http.scaladsl.server.directives.PathDirectives._
 import akka.http.scaladsl.server.directives.MethodDirectives._
 import akka.http.scaladsl.server.directives.RouteDirectives._
 import akka.stream.Materializer
-import org.json4s.DefaultJsonFormats
+import spray.json.{CompactPrinter, JsonPrinter, RootJsonWriter}
 
 import scala.concurrent.ExecutionContextExecutor
 
-trait Protocols extends DefaultJsonFormats
 
 trait Service extends Protocols {
   implicit val system: ActorSystem
@@ -22,10 +22,15 @@ trait Service extends Protocols {
 
   val logger: LoggingAdapter
 
+  implicit def sprayJsonMarshaller[T](
+    implicit writer: RootJsonWriter[T],
+    printer: JsonPrinter = CompactPrinter):
+  ToEntityMarshaller[T]
+
   val pathToModel: String
   val model: Model = Model.apply(pathToModel)
 
-  val routes = {
+  val routes: Route = {
     logRequestResult("model-service") {
       pathPrefix("predict")
         (post & path(Segment)) {

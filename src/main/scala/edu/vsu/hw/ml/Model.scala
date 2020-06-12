@@ -1,7 +1,11 @@
 package edu.vsu.hw.ml
 
+import java.time.OffsetDateTime
+
 import com.linkedin.relevance.isolationforest.{IsolationForest, IsolationForestModel}
 import org.apache.spark.sql.Dataset
+
+import scala.util.Random
 
 trait Model {
 
@@ -9,7 +13,7 @@ trait Model {
 
   protected final val isolationForestModel: IsolationForestModel = IsolationForestModel.load(pathToModel)
 
-  def predict(features: String): Double
+  def predict(features: String): HWPrediction
 
   def fitModel()
 
@@ -26,10 +30,10 @@ object Model {
   }
 
   private class ModelImplementation(override val pathToModel: String) extends Model {
-    override def predict(features: String): Double = {
+    override def predict(features: String): HWPrediction = {
       val representation = toInnerInterpretation(List())
       isolationForestModel.transform(representation)
-      25.0
+      HWPrediction(25.0)
     }
 
     override def fitModel(): Unit = {
