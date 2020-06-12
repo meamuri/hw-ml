@@ -23,6 +23,8 @@ trait Model {
 
   def withModel(f: IsolationForestModel => Unit)
 
+  def provideTrainingSet(data: List[HealthReport])
+
 }
 
 object Model {
@@ -49,6 +51,8 @@ object Model {
       val dataset = predictionConventions.toInnerInterpretation(entities)
       Runner.instanceIF().fit(dataset).save(pathToModel)
     }
+
+    override def provideTrainingSet(data: List[HealthReport]): Unit = fitModel(data)
 
     override def withModel(f: IsolationForestModel => Unit): Unit = {
       f(isolationForestModel)
