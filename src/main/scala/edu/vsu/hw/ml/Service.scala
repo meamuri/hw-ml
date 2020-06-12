@@ -3,11 +3,11 @@ package edu.vsu.hw.ml
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-//import akka.http.scaladsl.server.PathMatchers.Segment
-//import akka.http.scaladsl.server.directives.PathDirectives.Segment
+import akka.http.scaladsl.server.directives.PathDirectives.Segment
 import akka.http.scaladsl.server.directives.DebuggingDirectives._
 import akka.http.scaladsl.server.directives.PathDirectives._
 import akka.http.scaladsl.server.directives.MethodDirectives._
+import akka.http.scaladsl.server.directives.RouteDirectives._
 import akka.stream.Materializer
 import org.json4s.DefaultJsonFormats
 
@@ -28,7 +28,7 @@ trait Service extends Protocols {
   val routes = {
     logRequestResult("model-service") {
       pathPrefix("predict")
-        (post & pathSegment(Segment)) {
+        (post & path(Segment)) {
           features: String =>
             complete {
               ToResponseMarshallable(model.predict(features))
