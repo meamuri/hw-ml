@@ -12,7 +12,7 @@ class ModelService extends App with Service {
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  override val pathToModel: String = "/"
+  override val pathToModel: String = "model.data"
 
   override val logger: LoggingAdapter = Logging(system, getClass)
   Http().bindAndHandle(routes, "0.0.0.0", 9000)
